@@ -1,28 +1,23 @@
 using DifferentialEquations
 using Plots
 
-function mimic!(du,u,p,t)
+function mimic2d!(du,u,p,t)
 
 x,y = u
-α,β,γ,μ,τ = p
+α,β,σ,γ,τ,δ = p
 
-x0 = 0.005
-
-du[1] = α*x - y*y + x0
-du[2] = α*x*y - β*y
+du[1] = dx = α*x + σ*(x*x + y*y) + τ
+du[2] = dy = β*y + γ*x*y + 1.0 - δ
 
 end
 
-u0 = [1.0005,0.2]
-p = [0.05,0.0025,0.5,2.0,0.5]
-tspan = (0.0,100.0)
-prob = ODEProblem(mimic!,u0,tspan,p)
+u0 = [0.005,0.000002]
+p = [0.05,-0.25,-0.001,0.002,0.005,1.5]
+tspan = (0.0,1000.0)
+prob = ODEProblem(mimic2d!,u0,tspan,p)
 
-sol = solve(prob,Tsit5())
+sol = solve(prob,Tsit5(),adaptive=true)
 
-# plot(sol,linewidth=1,layout=(2,1),legend=false)
-
-gr()
 f(x,y) = (x,y^2)
 
 px = plot(sol,vars=1,linewidth=1,xaxis="t",yaxis="x",legend=false)
