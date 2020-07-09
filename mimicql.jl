@@ -8,7 +8,7 @@ function lh!(du,u,p,t)
     α,β,γ = p
 
     du[1] = dx = α*x + β*(x*x + y*y) + γ
-    du[2] = dy = α*y + β*(x*y)
+    du[2] = dy = α*y + β*(2.0*x*y)
 
 end
 
@@ -19,7 +19,7 @@ function lc!(du,u,p,t)
     α,β,γ = p
 
     du[1] = dx = α*x + β*(x*x + z) + γ
-    du[2] = dz = 2.0*(α*z + β*x*z)
+    du[2] = dz = 2.0*(α*z + β*(2.0*x*z))
 
 end
 
@@ -29,21 +29,21 @@ u0_lc   = [u0_lh[1], u0_lh[2]^2]
 
 # @show u0_lh, u0_lc
 
-p       = [-1.0,0.5,0.5]
+p       = [-1.0,1.0,0.5]
 tspan   = (0.0,100.0)
 
 # solve GQL analogue
 prob_lh = ODEProblem(lh!,u0_lh,tspan,p)
-sol_lh  = solve(prob_lh,RK4(),reltol=1e-8)
+sol_lh  = solve(prob_lh,Tsit5(),reltol=1e-8)
 
 # solve GCE2 analogue
 prob_lc = ODEProblem(lc!,u0_lc,tspan,p)
-sol_lc  = solve(prob_lc,RK4(),reltol=1e-8)
+sol_lc  = solve(prob_lc,Tsit5(),reltol=1e-8)
 
 # second cumulant and power
-f(x,y)  = (x,y*y)
-g(x,y)  = (x,Float64(y*conj(y)))
-h(x,y)  = (x,Float64(y*y*conj(y*y)))
+f(x,y)  = (x,y^2)
+g(x,y)  = (x,abs(y)^2)
+h(x,y)  = (x,abs(y^2)^2)
 
 pyplot()
 
