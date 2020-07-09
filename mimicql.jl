@@ -5,22 +5,23 @@ using Plots, PyPlot
 function lh!(du,u,p,t)
 
 x,y = u
-α,β,σ,γ,τ,δ = p
+α,γ = p
 
-du[1] = dx = α*x + σ*(x*x + y*y) + τ
-du[2] = dy = β*y + γ*x*y + δ
+du[1] = dx = α*x + (x*x + y*y) + γ
+du[2] = dy = α*y + x*y
 
 end
 
-u0 = [0.005,0.000005]
-p = [0.05,-0.25,-0.001,0.002,0.0005,-0.000005]
-tspan = (0.0,1000.0)
-prob = ODEProblem(lh!,u0,tspan,p)
+u0 = randn(ComplexF64,2)
+# p = [0.05,-0.25,-0.001,0.002,0.0005,-0.000005]
+p = [-0.05,0.005]
+tspan = (0.0,100.0)
 
-sol = solve(prob,Tsit5(),adaptive=true)
+prob = ODEProblem(lh!,u0,tspan,p)
+sol = solve(prob,RK4(),adaptive=true)
 
 # second cumulant analogue in 2d
-f(x,y) = (x,y^2)
+f(x,y) = (x,Float64(y*conj(y)))
 
 pyplot()
 px = plot(sol,vars=1,linewidth=1,xaxis="t",yaxis="x",legend=false)
