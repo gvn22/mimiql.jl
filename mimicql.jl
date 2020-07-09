@@ -1,58 +1,54 @@
 using DifferentialEquations
 using Plots, PyPlot
 
-# gql analogue with only low and high modes
+# 2D GQL analogue: low mode & high mode
 function lh!(du,u,p,t)
 
-x,y = u
-α,γ = p
+    x,y   = u
+    α,β,γ = p
 
-du[1] = dx = α*x + (x*x + y*y) + γ
-du[2] = dy = α*y + x*y
+    du[1] = dx = α*x + β*(x*x + y*y) + γ
+    du[2] = dy = α*y + β*(x*y)
 
 end
 
-u0 = randn(ComplexF64,2)
-# p = [0.05,-0.25,-0.001,0.002,0.0005,-0.000005]
-p = [-0.5,0.8]
-tspan = (0.0,100.0)
+# 2D GCE2 analogue: low mode & second cumulant
+function lc!(du,u,p,t)
 
-prob = ODEProblem(lh!,u0,tspan,p)
-sol = solve(prob,RK4(),adaptive=true)
+    x,z   = u
+    α,β,γ = p
 
-# second cumulant analogue in 2d
-f(x,y) = (x,Float64(y*conj(y)))
+    du[1] = dx = α*x + β*(x*x + z) + γ
+    du[2] = dz = 2.0*(α*z + β*x*z)
+
+end
+
+# initialise GQL and GCE2
+u0_gql  = randn(ComplexF64,2)
+u0_gce2[1] = u0_gql[1]
+u0_gce2[2] = u0_gql[2]^2
+
+p       = [1.0,-2.0,1.5]
+tspan   = (0.0,100.0)
+
+# solve GQL equations
+prob    = ODEProblem(lh!,u0_gql,tspan,p)
+gql     = solve(prob,RK4())
+
+# solve GCE2 equations
+prob    = ODEProblem(lc!,u0_gce2,tspan,p)
+gce2    = solve(prob,RK4())
+
+# second cumulant, and power
+f(x,y)  = (x,y*y)
+g(x,y)  = (x,Float64(y*conj(y)))
+h(x,y)  = (x,Float64(y*y*conj(y*y)))
 
 pyplot()
-px = plot(sol,vars=1,linewidth=1,xaxis="t",yaxis="x",legend=false)
-py = plot(sol,vars=2,linewidth=1,xaxis="t",yaxis="y",legend=false)
-pz = plot(sol,vars=(f,0,2),linewidth=1,xaxis="t",yaxis="z = y^2",legend=false)
-plot(plot(px,py,layout=(1,2)),plot(pz),layout=(2,1))
 
-# gql analogue with a low and two high modes
-# function lhh!(du,u,p,t)
-#
-# x,y,z = u
-# α,β,σ,γ,τ,δ = p
-#
-# β2,γ2,δ2 = β/2.0,γ/3.0,δ/4.0
-#
-# du[1] = dx = α*x + σ*(x*x + y*y + y*z + z*z) + τ
-# du[2] = dy = β*y + γ*(x*y + x*z) + δ
-# du[3] = dz = β2*z + γ2*(x*z + x*y) + δ2
-#
-# end
+pl_gql  = plot(gql,vars=(g,0,1),linewidth=1,xaxis="t",yaxis="x",title="low: GQL",legend=false)
+pl_gce2 = plot(gce2,vars=(g,0,1),linewidth=1,xaxis="t",yaxis="x",title="low: GCE2",legend=false)
+pc_gql  = plot(gql,vars=(h,0,2),linewidth=1,xaxis="t",yaxis="x",title="cumulant: GQL",legend=false)
+pc_gce2 = plot(gce2,vars=(g,0,2),linewidth=1,xaxis="t",yaxis="y",title="cumulant: GCE2",legend=false)
 
-# u0 = [0.005,0.000005,0.001]
-# p = [0.05,-0.25,-0.001,0.002,0.0005,-0.000005]
-# tspan = (0.0,1000.0)
-# prob = ODEProblem(lhh!,u0,tspan,p)
-# sol = solve(prob,Tsit5(),adaptive=true)
-
-# second cumulant analogue in 3d
-# f(x,y,z) = (x,y^2 + y*z + z^2)
-# px = plot(sol,vars=1,linewidth=1.5,xaxis="t",yaxis="x",legend=false)
-# py = plot(sol,vars=2,linewidth=1.5,xaxis="t",yaxis="y",legend=false)
-# pz = plot(sol,vars=3,linewidth=1.5,xaxis="t",yaxis="z",legend=false)
-# pyz = plot(sol,vars=(f,0,2,3),linewidth=1.5,xaxis="t",yaxis="z = y^2",legend=false)
-# plot(px,py,pz,layout=(3,1))
+plot(plot(pl_gql,pl_gce2,layout=(1,2)),plot(pc_gql,pc_gce2,layout=(1,2)),layout=(2,1))
