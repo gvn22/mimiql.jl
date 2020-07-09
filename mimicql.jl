@@ -24,31 +24,32 @@ function lc!(du,u,p,t)
 end
 
 # initialise GQL and GCE2
-u0_gql  = randn(ComplexF64,2)
-u0_gce2[1] = u0_gql[1]
-u0_gce2[2] = u0_gql[2]^2
+u0_lh   = randn(ComplexF64,2)
+u0_lc   = [u0_lh[1], u0_lh[2]^2]
 
-p       = [1.0,-2.0,1.5]
+# @show u0_lh, u0_lc
+
+p       = [-1.0,0.5,0.5]
 tspan   = (0.0,100.0)
 
-# solve GQL equations
-prob    = ODEProblem(lh!,u0_gql,tspan,p)
-gql     = solve(prob,RK4())
+# solve GQL analogue
+prob_lh = ODEProblem(lh!,u0_lh,tspan,p)
+sol_lh  = solve(prob_lh,RK4(),reltol=1e-8)
 
-# solve GCE2 equations
-prob    = ODEProblem(lc!,u0_gce2,tspan,p)
-gce2    = solve(prob,RK4())
+# solve GCE2 analogue
+prob_lc = ODEProblem(lc!,u0_lc,tspan,p)
+sol_lc  = solve(prob_lc,RK4(),reltol=1e-8)
 
-# second cumulant, and power
+# second cumulant and power
 f(x,y)  = (x,y*y)
 g(x,y)  = (x,Float64(y*conj(y)))
 h(x,y)  = (x,Float64(y*y*conj(y*y)))
 
 pyplot()
 
-pl_gql  = plot(gql,vars=(g,0,1),linewidth=1,xaxis="t",yaxis="x",title="low: GQL",legend=false)
-pl_gce2 = plot(gce2,vars=(g,0,1),linewidth=1,xaxis="t",yaxis="x",title="low: GCE2",legend=false)
-pc_gql  = plot(gql,vars=(h,0,2),linewidth=1,xaxis="t",yaxis="x",title="cumulant: GQL",legend=false)
-pc_gce2 = plot(gce2,vars=(g,0,2),linewidth=1,xaxis="t",yaxis="y",title="cumulant: GCE2",legend=false)
+pl_lh   = plot(sol_lh,vars=(g,0,1),linewidth=1,xaxis="t",yaxis="x",title="low: GQL",legend=false)
+pl_lc   = plot(sol_lc,vars=(g,0,1),linewidth=1,xaxis="t",yaxis="x",title="low: GCE2",legend=false)
+pc_lh   = plot(sol_lh,vars=(h,0,2),linewidth=1,xaxis="t",yaxis="y^2",title="cumulant: GQL",legend=false)
+pc_lc   = plot(sol_lc,vars=(g,0,2),linewidth=1,xaxis="t",yaxis="z",title="cumulant: GCE2",legend=false)
 
-plot(plot(pl_gql,pl_gce2,layout=(1,2)),plot(pc_gql,pc_gce2,layout=(1,2)),layout=(2,1))
+plot(plot(pl_lh,pl_lc,layout=(1,2)),plot(pc_lh,pc_lc,layout=(1,2)),layout=(2,1))
