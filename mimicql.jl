@@ -7,7 +7,7 @@ function lh!(du,u,p,t)
     x,y   = u
     α,β,γ = p
 
-    du[1] = dx = α*x + β*(x*x + y*y) + γ
+    du[1] = dx = α*x + β*(x*x + y*y) + γ*(x - 1.0)
     du[2] = dy = α*y + β*(2.0*x*y)
 
 end
@@ -18,7 +18,7 @@ function lc!(du,u,p,t)
     x,z   = u
     α,β,γ = p
 
-    du[1] = dx = α*x + β*(x*x + z) + γ
+    du[1] = dx = α*x + β*(x*x + z) + γ*(x - 1.0)
     du[2] = dz = 2.0*(α*z + β*(2.0*x*z))
 
 end
@@ -29,7 +29,7 @@ u0_lc   = [u0_lh[1], u0_lh[2]^2]
 
 # @show u0_lh, u0_lc
 
-p       = [-1.0,1.0,0.5]
+p       = [-1.0,1.5,0.25]
 tspan   = (0.0,100.0)
 
 # solve GQL analogue
