@@ -20,8 +20,8 @@ end β α
 
 # solve over a region in parameter space
 # βs,αs   = [0.1,1.0,10.0],[0.01,0.1,1.0]
-βs = [10.0^i for i=-3:1:1]
-αs = [10.0^i for i=-3:1:1]
+βs = [10.0^i for i=-2:1:1]
+αs = [10.0^i for i=-2:1:1]
 
 px,py   = length(βs),length(αs)
 
@@ -42,15 +42,15 @@ for i ∈ CartesianIndices((1:px,1:py))
         u0_lh   = randn(ComplexF64,2)
         u0_lc   = [u0_lh[1], u0_lh[2]^2]
 
-        println("IC: x = ",u0_lh[1], " y = ",u0_lh[2])
+        # println("IC: x = ",u0_lh[1], " y = ",u0_lh[2])
 
         p       = [βs[i[1]],αs[i[2]]]
 
         prob_lh = ODEProblem(lh,u0_lh,tspan,p)
-        sol_lh  = solve(prob_lh,RK4(),adaptive=false,dt=0.001,abstol=1e-6,reltol=1e-6)
+        sol_lh  = solve(prob_lh,Tsit5(),adaptive=false,dt=0.001,abstol=1e-6,reltol=1e-6)
 
         prob_lc = ODEProblem(lc,u0_lc,tspan,p)
-        sol_lc  = solve(prob_lc,RK4(),adaptive=false,dt=0.001,abstol=1e-6,reltol=1e-6)
+        sol_lc  = solve(prob_lc,Tsit5(),adaptive=false,dt=0.001,abstol=1e-6,reltol=1e-6)
 
         l1 = [abs(x) for x in sol_lh[1,:]]
         l2 = [abs(x) for x in sol_lc[1,:]]
@@ -60,9 +60,10 @@ for i ∈ CartesianIndices((1:px,1:py))
 
         dl = norm(l1 - l2)
         dc = norm(c1 - c2)
-
-        lnorms[i] += dl
-        cnorms[i] += dc
+        if(!isnan(dl) && !isnan(dc))
+            lnorms[i] += dl
+            cnorms[i] += dc
+        end
 
         println("Diff: low = ", dl, " cumulant = ",dc)
 
@@ -92,6 +93,6 @@ pyplot()
 xs = [string(i) for i = βs]
 ys = [string(i) for i = αs]
 
-p1 = wireframe(xs,ys,lnorms',zaxis="x",xaxis="β",yaxis="α")
+p1 = wireframe(xs,ys,lnorms',zaxis="x",xaxis="β",yaxis="α",title="Tsit5")
 p2 = wireframe(xs,ys,cnorms',zaxis="z",xaxis="β",yaxis="α")
-Plots.plot(p1,p2,layout=(1,2))
+# Plots.plot(p1,p2,layout=(1,2))
