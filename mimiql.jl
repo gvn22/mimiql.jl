@@ -20,7 +20,7 @@ lc = @ode_def_bare GCE2 begin
 end α β
 
 # solve over region in parameter space
-αs = [10.0^i for i=-2:1:0]
+αs = [10.0^i for i=-2:1:1]
 βs = [10.0^i for i=-2:1:1]
 lα,lβ = length(αs),length(βs)
 ldiffs,cdiffs = zeros(Float64,lα,lβ),zeros(Float64,lα,lβ)
@@ -33,8 +33,8 @@ for i ∈ CartesianIndices((1:lα,1:lβ))
 
     println("Loading parameters: α = ",αs[i[1]], " β = ",βs[i[2]])
 
-    S = 0
-    while S < 100
+    S = 0.0
+    while S < 1000
 
         u0_lh   = rand(ComplexF64,2)
         u0_lc   = [u0_lh[1], u0_lh[2]^2]
@@ -57,7 +57,7 @@ for i ∈ CartesianIndices((1:lα,1:lβ))
             ldiffs[i] += normdx
             cdiffs[i] += normdz
 
-            S += 1
+            S += 1.0
 
         end
 
@@ -79,16 +79,16 @@ for i ∈ CartesianIndices((1:lα,1:lβ))
 
     end
 
-    ldiffs[i] /= S
-    cdiffs[i] /= S
+    ldiffs[i] = ldiffs[i]/S
+    cdiffs[i] = cdiffs[i]/S
 
 end
 
-pyplot()
+plotly()
 
-ys = [string(i) for i = αs]
-xs = [string(i) for i = βs]
+xs = [string(i) for i ∈ αs]
+ys = [string(i) for i ∈ βs]
 
-p1 = wireframe(xs,ys,lnorms,zaxis="x",xaxis="β",yaxis="α",title="RK4")
-p2 = wireframe(xs,ys,cnorms,zaxis="z",xaxis="β",yaxis="α")
+p1 = Plots.plot(xs,ys,ldiffs',st=:contourf,color=:acton,xaxis="α",yaxis="β",title="x")
+p2 = Plots.plot(xs,ys,cdiffs',st=:contourf,palette = cgrad(:blues).colors,xaxis="α",yaxis="β",title="z")
 Plots.plot(p1,p2,layout=(1,2))
