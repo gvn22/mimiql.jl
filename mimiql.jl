@@ -58,11 +58,12 @@ cs = [10.0^i for i=-2:1:1]
 la,lc = length(as),length(cs)
 xdiffs,zdiffs = zeros(Float64,la,lc),zeros(Float64,la,lc)
 
-println(" ") # flush
+println(" ") # flush output
 
 for i ∈ CartesianIndices((1:la,1:lc))
 
-    println("Loading parameters: a = ",as[i[1]], " c = ",cs[i[2]])
+    a,c = as[i[1]],cs[i[2]]
+    println("Loading parameters: a = ", a, " c = ", c)
 
     S = 0.0
 
@@ -71,9 +72,7 @@ for i ∈ CartesianIndices((1:la,1:lc))
         u0_xy   = randn(ComplexF64,2)
         u0_xz   = [u0_xy[1], u0_xy[2]^2]
         tspan   = (0.0,100.0)
-        # println("IC: x = ",u0_xy[1], " y = ",u0_xy[2])
-
-        p       = [as[i[1]],cs[i[2]]]
+        p       = [a,c]
 
         prob_xy = ODEProblem(fxy,u0_xy,tspan,p)
         sol_xy  = solve(prob_xy,RK4(),dense=true,abstol=1e-8,reltol=1e-8)
@@ -98,7 +97,7 @@ for i ∈ CartesianIndices((1:la,1:lc))
     xdiffs[i] /= S
     zdiffs[i] /= S
 
-    println("Mean difference: dx = ", xdiffs[i], " dz = ", zdiffs[i])
+    println("Difference: dx = ", xdiffs[i], " dz = ", zdiffs[i])
 
 end
 
@@ -111,7 +110,7 @@ p1 = Plots.plot(xs,ys,xdiffs',st=:contourf,color=:matter,xaxis="a",yaxis="c",tit
 # p2 = Plots.plot(xs,ys,zdiffs',st=:contourf,color=:matter,xaxis="a",yaxis="c",title="Δz")
 # Plots.plot(p1,p2,layout=(1,2))
 
-plot_at_param(0.1, 10.0)
+# plot_at_param(0.1, 10.0)
 
 
 # using Distributed
