@@ -1,6 +1,5 @@
 using DifferentialEquations, LinearAlgebra, ParameterizedFunctions, OrdinaryDiffEq
-using Plots, PlotlyJS
-plotly()
+using Plots, PlotlyJS; plotly()
 
 # f(xy) -> 2D GQL analogue with one low & one high mode
 # g(xz) -> 2D GCE2 analogue with one low mode & second cumulant
@@ -97,7 +96,7 @@ end
 xs = ["0.01","0.0316","0.1","0.316","1.0","3.16","10.0"]
 ys = ["0.01","0.0316","0.1","0.316","1.0","3.16","10.0"]
 
-p1 = Plots.plot(xs,ys,xdiffs[:,:,10000]',st=:contourf,color=:matter,xaxis="a",yaxis="c",title="Δx")
+p1 = Plots.plot(xs,ys,xdiffs[:,:,100000]',st=:contourf,color=:matter,xaxis="a",yaxis="c",title="Δx")
 # p2 = Plots.plot(xs,ys,zdiffs[:,:,1000]',st=:contourf,color=:matter,xaxis="a",yaxis="c",title="Δz")
 
 # function plot_at_param(pa,pb)
